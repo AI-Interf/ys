@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Kahoot! — Child Effect on Parents</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; min-height: 100vh; overflow-x: hidden; }
+body { font-family: 'Montserrat', sans-serif; background: #46178F; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 24px 16px; }
+.screen { display: none; width: 100%; max-width: 780px; flex-direction: column; align-items: center; gap: 20px; }
+.screen.active { display: flex; }
+button { cursor: pointer; font-family: 'Montserrat', sans-serif; border: none; }
+a { color: #fff; text-decoration: none; }
+
+/* Answer grid */
+.ans-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; }
+.ans-btn { display: flex; align-items: center; gap: 12px; border-radius: 10px; padding: 16px 14px; color: #fff; font-size: 16px; font-weight: 800; text-align: left; width: 100%; word-break: break-word; line-height: 1.3; transition: opacity 0.2s; }
+.ans-btn:disabled { cursor: default; }
+.ans-icon { flex-shrink: 0; width: 36px; height: 36px; background: rgba(0,0,0,0.25); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+
+@keyframes pulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.07)} }
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<!-- LOBBY -->
+<div class="screen active" id="lobby" style="gap:24px;justify-content:center;min-height:80vh;">
+  <div style="background:#fff;border-radius:14px;padding:12px 36px;">
+    <span style="font-size:48px;font-weight:900;color:#46178F;letter-spacing:-1px;">kahoot!</span>
+  </div>
+  <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:28px 32px;text-align:center;width:100%;">
+    <div style="font-size:13px;color:rgba(255,255,255,0.65);text-transform:uppercase;letter-spacing:0.12em;margin-bottom:12px;">Child Effect on Parents</div>
+    <div style="font-size:22px;color:#fff;font-weight:800;line-height:1.35;">4 Questions · 20 Seconds Each</div>
+  </div>
+  <button onclick="startGame()" style="background:#fff;color:#46178F;border-radius:10px;padding:18px 64px;font-size:22px;font-weight:900;box-shadow:0 5px 0 rgba(0,0,0,0.3);">Start Game</button>
+  <span style="color:rgba(255,255,255,0.45);font-size:13px;">Single-player mode</span>
+</div>
+
+<!-- COUNTDOWN -->
+<div class="screen" id="countdown" style="justify-content:center;min-height:80vh;">
+  <div style="font-size:17px;color:rgba(255,255,255,0.65);font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">Get Ready!</div>
+  <div id="countNum" style="font-size:160px;color:#fff;font-weight:900;line-height:1;animation:pulse 0.6s ease infinite;"></div>
+</div>
+
+<!-- QUESTION -->
+<div class="screen" id="questionScreen" style="gap:14px;">
+  <div style="background:rgba(0,0,0,0.3);border-radius:10px 10px 0 0;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;width:100%;">
+    <span id="qLabel" style="color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;"></span>
+    <span id="timerDisplay" style="font-size:17px;font-weight:900;color:#fff;"></span>
+    <span id="scoreDisplay" style="color:rgba(255,255,255,0.6);font-size:13px;font-weight:700;"></span>
+  </div>
+  <div style="background:rgba(0,0,0,0.18);border-radius:0 0 10px 10px;width:100%;overflow:hidden;">
+    <div style="height:6px;background:rgba(0,0,0,0.2);position:relative;">
+      <div id="timerBar" style="position:absolute;left:0;top:0;height:100%;width:100%;border-radius:3px;transition:width 1s linear,background 1s;"></div>
+    </div>
+    <div style="padding:24px 20px;text-align:center;">
+      <div id="questionText" style="font-size:18px;color:#fff;font-weight:800;line-height:1.45;"></div>
+    </div>
+  </div>
+  <div class="ans-grid">
+    <button id="btnA" onclick="choose(0)" class="ans-btn" style="background:#E21B3C;">
+      <span class="ans-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="12,2 22,20 2,20"/></svg></span><span id="ansA"></span>
+    </button>
+    <button id="btnB" onclick="choose(1)" class="ans-btn" style="background:#1368CE;">
+      <span class="ans-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><rect x="2" y="2" width="20" height="20"/></svg></span><span id="ansB"></span>
+    </button>
+    <button id="btnC" onclick="choose(2)" class="ans-btn" style="background:#FFA602;">
+      <span class="ans-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10"/></svg></span><span id="ansC"></span>
+    </button>
+    <button id="btnD" onclick="choose(3)" class="ans-btn" style="background:#26890C;">
+      <span class="ans-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="12,2 22,12 12,22 2,12"/></svg></span><span id="ansD"></span>
+    </button>
+  </div>
+</div>
+
+<!-- REVEAL -->
+<div class="screen" id="reveal" style="text-align:center;gap:20px;justify-content:center;min-height:70vh;">
+  <div id="revealEmoji" style="font-size:64px;"></div>
+  <div id="revealMsg" style="font-size:32px;color:#fff;font-weight:900;"></div>
+  <div style="background:rgba(255,255,255,0.12);border-radius:12px;padding:20px 36px;width:100%;">
+    <div style="font-size:12px;color:rgba(255,255,255,0.55);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.1em;">Correct Answer</div>
+    <div id="correctAnswerText" style="font-size:20px;color:#fff;font-weight:800;"></div>
+  </div>
+  <div id="pointsMsg" style="font-size:18px;color:rgba(255,255,255,0.7);font-weight:700;"></div>
+  <button id="nextBtn" onclick="nextStep()" style="background:#fff;color:#46178F;border-radius:10px;padding:16px 52px;font-size:18px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,0.3);"></button>
+</div>
+
+<!-- FINAL -->
+<div class="screen" id="final" style="text-align:center;gap:24px;justify-content:center;min-height:80vh;">
+  <div style="background:#fff;border-radius:14px;padding:10px 32px;">
+    <span style="font-size:40px;font-weight:900;color:#46178F;">kahoot!</span>
+  </div>
+  <div style="font-size:30px;color:#fff;font-weight:900;">Game Over!</div>
+  <div style="background:rgba(255,255,255,0.12);border-radius:14px;padding:32px 48px;width:100%;">
+    <div style="font-size:13px;color:rgba(255,255,255,0.55);font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.1em;">Final Score</div>
+    <div id="finalScore" style="font-size:80px;color:#fff;font-weight:900;line-height:1;"></div>
+    <div style="font-size:16px;color:rgba(255,255,255,0.55);margin-top:8px;">out of 4000 points</div>
+  </div>
+  <div id="finalMsg" style="font-size:20px;color:#fff;font-weight:700;line-height:1.4;"></div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;">
+    <button onclick="restartGame()" style="background:#fff;color:#46178F;border-radius:10px;padding:14px 36px;font-size:17px;font-weight:900;box-shadow:0 4px 0 rgba(0,0,0,0.3);">Play Again</button>
+    <a href="child-effect-on-parents-bundle.html" style="background:rgba(255,255,255,0.15);border:2px solid rgba(255,255,255,0.35);border-radius:10px;padding:14px 36px;font-size:17px;font-weight:800;display:inline-flex;align-items:center;">Back to Deck</a>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  { q: 'What term describes the developmental process of becoming a mother — coined by anthropologist Dana Raphael?', answers: ['Adolescence', 'Matrescence', 'Metamorphosis', 'Parentification'], correct: 1 },
+  { q: 'Approximately what percentage of couples report a significant decline in marital quality in the first 3 years post-birth?', answers: ['33%', '50%', '67%', '85%'], correct: 2 },
+  { q: 'Compared to non-parents, parents consistently report which of the following?', answers: ['Higher daily happiness', 'More free time', 'Stronger sense of purpose & meaning', 'Better physical health'], correct: 2 },
+  { q: 'What percentage of mothers experience postpartum depression in the first year?', answers: ['2–3%', '5–7%', '10–15%', '20–25%'], correct: 2 }
+];
+
+let currentQ = 0, score = 0, timer = 20, timerInterval = null, answered = false;
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function startGame() {
+  currentQ = 0; score = 0;
+  runCountdown(() => loadQuestion());
+}
+
+function runCountdown(cb) {
+  show('countdown');
+  let n = 3;
+  document.getElementById('countNum').textContent = n;
+  const cd = setInterval(() => {
+    n--;
+    if (n <= 0) { clearInterval(cd); cb(); }
+    else document.getElementById('countNum').textContent = n;
+  }, 900);
+}
+
+function loadQuestion() {
+  answered = false; timer = 20;
+  const q = QUESTIONS[currentQ];
+  document.getElementById('qLabel').textContent = 'Question ' + (currentQ + 1) + ' of ' + QUESTIONS.length;
+  document.getElementById('scoreDisplay').textContent = 'Score: ' + score;
+  document.getElementById('questionText').textContent = q.q;
+  ['A','B','C','D'].forEach((l, i) => { document.getElementById('ans'+l).textContent = q.answers[i]; });
+  ['btnA','btnB','btnC','btnD'].forEach(id => { const b = document.getElementById(id); b.style.opacity='1'; b.disabled=false; });
+  updateTimer();
+  show('questionScreen');
+  clearInterval(timerInterval);
+  timerInterval = setInterval(() => { timer--; updateTimer(); if (timer <= 0) { clearInterval(timerInterval); revealAnswer(null); } }, 1000);
+}
+
+function updateTimer() {
+  document.getElementById('timerDisplay').textContent = timer + 's';
+  document.getElementById('timerDisplay').style.color = timer > 10 ? '#fff' : timer > 5 ? '#FFA602' : '#E21B3C';
+  const bar = document.getElementById('timerBar');
+  bar.style.width = (timer / 20 * 100) + '%';
+  bar.style.background = timer > 10 ? '#26890C' : timer > 5 ? '#FFA602' : '#E21B3C';
+}
+
+function choose(idx) {
+  if (answered) return;
+  answered = true;
+  clearInterval(timerInterval);
+  revealAnswer(idx);
+}
+
+function revealAnswer(idx) {
+  const correct = QUESTIONS[currentQ].correct;
+  const wasCorrect = idx === correct;
+  const points = wasCorrect ? Math.round(500 + (timer / 20) * 500) : 0;
+  if (wasCorrect) score += points;
+  ['btnA','btnB','btnC','btnD'].forEach((id, i) => {
+    const b = document.getElementById(id); b.disabled = true;
+    b.style.opacity = (i === correct) ? '1' : (i === idx ? '0.45' : '0.25');
+  });
+  document.getElementById('revealEmoji').textContent = idx === null ? '⏰' : wasCorrect ? '✅' : '❌';
+  document.getElementById('revealMsg').textContent = idx === null ? "Time's up!" : wasCorrect ? 'Correct!' : 'Not quite!';
+  document.getElementById('correctAnswerText').textContent = QUESTIONS[currentQ].answers[correct];
+  document.getElementById('pointsMsg').textContent = wasCorrect ? '+' + points + ' points' : 'No points this round';
+  document.getElementById('nextBtn').textContent = currentQ + 1 >= QUESTIONS.length ? 'See Final Score' : 'Next Question →';
+  show('reveal');
+}
+
+function nextStep() {
+  currentQ++;
+  if (currentQ >= QUESTIONS.length) {
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('finalMsg').textContent =
+      score >= 3500 ? '🏆 Outstanding! You clearly paid attention!' :
+      score >= 2000 ? '🎉 Great work! Solid understanding!' :
+      score >= 1000 ? '👏 Good effort! Review the slides to improve.' :
+      '📚 No worries — the slides cover it all!';
+    document.body.style.background = '#1a0044';
+    show('final');
+  } else {
+    runCountdown(() => loadQuestion());
+  }
+}
+
+function restartGame() {
+  document.body.style.background = '#46178F';
+  show('lobby');
+}
+</script>
+</body>
+</html>
